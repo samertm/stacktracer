@@ -91,7 +91,7 @@ func parse(trace string) []parsed {
 var testing bool
 
 func main() {
-	testing = true
+	testing = false
 	http.HandleFunc("/parse", serveParse)
 	if testing {
 		http.Handle("/", http.FileServer(http.Dir(".")))
