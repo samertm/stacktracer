@@ -88,9 +88,14 @@ func parse(trace string) []parsed {
 	return out
 }
 
+var testing bool
+
 func main() {
+	testing = true
 	http.HandleFunc("/parse", serveParse)
-	http.Handle("/", http.FileServer(http.Dir(".")))
+	if testing {
+		http.Handle("/", http.FileServer(http.Dir(".")))
+	}
 	log.Println("listening on localhost:8877")
 	log.Fatal(http.ListenAndServe(":8877", nil))
 }
