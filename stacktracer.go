@@ -66,7 +66,7 @@ func parse(trace string) []parsed {
 		}
 		i := -1
 		for _, host := range validHosts {
-			i := strings.Index(m[1], host)
+			i = strings.Index(m[1], host)
 			if i != -1 {
 				break
 			}
