@@ -1,9 +1,14 @@
 /** @jsx React.DOM */
 var Output = React.createClass({
     render: function() {
+        var outputRows = this.props.serverOutput.map(function(out) {
+            return (
+                <p><a href={out.link}>{out.filename} at line {out.linenum}</a></p>
+            );
+        });
         return (
             <div className="output">
-            <p>{this.props.serverOutput}</p>
+            {outputRows}
             </div>
         );
     }
@@ -15,7 +20,7 @@ var Input = React.createClass({
     },
     render: function() {
         return (
-            <div className="input">
+            <div className="input" style={{float: "left"}}>
             <button onClick={this.onTrace}>trace my stack!</button><br />
             <textarea ref="userInput" rows="30" cols="80" style={{height: 'auto'}}></textarea>
             </div>
@@ -24,7 +29,7 @@ var Input = React.createClass({
 });
 var Tracer = React.createClass({
     getInitialState: function() {
-        return {serverOutput: ""}
+        return {serverOutput: []}
     },
     handleTrace: function(trace) {
         $.ajax({
@@ -36,7 +41,7 @@ var Tracer = React.createClass({
                 if (output !== null) {
                     this.setState({serverOutput: output})
                 } else {
-                    this.setState({serverOutput: ""})
+                    this.setState({serverOutput: []})
                 }
             }.bind(this),
             error: function(xhr, status, err) {
@@ -47,7 +52,7 @@ var Tracer = React.createClass({
     render: function() {
         return (
             <div className="tracer">
-            <Input handleTrace={this.handleTrace} />
+            <Input handleTrace={this.handleTrace}/>
             <Output serverOutput={this.state.serverOutput}/>
             </div>
         );

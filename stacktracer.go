@@ -49,15 +49,28 @@ func serveParse(w http.ResponseWriter, r *http.Request) {
 var goTraceRE = regexp.MustCompile(`([^ ]*\.go):(\d+)`)
 var baseURL = "https://sourcegraph.com/"
 
-func parse(trace string) string {
-	out := make([]string, 0)
+type parsed struct {
+	Link     string `json:"link"`
+	Filename string `json:"filename"`
+	LineNum  string `json:"linenum"`
+}
+
+var validHosts = []string{"github.com/", "sourcegraph.com/"}
+
+func parse(trace string) []parsed {
+	out := make([]parsed, 0)
 	for _, line := range strings.Split(trace, "\n") {
 		m := goTraceRE.FindStringSubmatch(line)
 		if m == nil {
 			continue
 		}
-		// Only works with github right now.
-		i := strings.Index(m[1], "github.com/")
+		i := -1
+		for _, host := range validHosts {
+			i := strings.Index(m[1], host)
+			if i != -1 {
+				break
+			}
+		}
 		if i == -1 {
 			continue
 		}
@@ -66,13 +79,13 @@ func parse(trace string) string {
 			continue
 		}
 		repo := strings.Join(path[0:3], "/")
-		out = append(out, baseURL+repo+"/.tree/"+path[3]+
-			"#startline="+m[2]+"&endline="+m[2])
+		out = append(out, parsed{
+			Link:     baseURL + repo + "/.tree/" + path[3] + "#startline=" + m[2] + "&endline=" + m[2],
+			Filename: repo + "/" + path[3],
+			LineNum:  m[2],
+		})
 	}
-	if len(out) == 0 {
-		return "no results"
-	}
-	return strings.Join(out, "\n")
+	return out
 }
 
 func main() {
